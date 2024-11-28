@@ -14,8 +14,7 @@ import 'platform_in_app_localhost_server.dart';
 /// value to avoid breaking changes. See [PlatformInAppLocalhostServerCreationParams] for
 /// more information.
 @immutable
-class DefaultInAppLocalhostServerCreationParams
-    extends PlatformInAppLocalhostServerCreationParams {
+class DefaultInAppLocalhostServerCreationParams extends PlatformInAppLocalhostServerCreationParams {
   /// Creates a new [DefaultInAppLocalhostServerCreationParams] instance.
   const DefaultInAppLocalhostServerCreationParams(
     // This parameter prevents breaking changes later.
@@ -38,21 +37,20 @@ class DefaultInAppLocalhostServer extends PlatformInAppLocalhostServer {
   bool _shared = false;
   String _directoryIndex = 'index.html';
   String _documentRoot = './';
+  bool _useRootAssets = true;
 
   /// Creates a new [DefaultInAppLocalhostServer].
   DefaultInAppLocalhostServer(PlatformInAppLocalhostServerCreationParams params)
       : super.implementation(
           params is DefaultInAppLocalhostServerCreationParams
               ? params
-              : DefaultInAppLocalhostServerCreationParams
-                  .fromPlatformInAppLocalhostServerCreationParams(params),
+              : DefaultInAppLocalhostServerCreationParams.fromPlatformInAppLocalhostServerCreationParams(params),
         ) {
     this._port = params.port;
     this._directoryIndex = params.directoryIndex;
-    this._documentRoot = (params.documentRoot.endsWith('/'))
-        ? params.documentRoot
-        : '${params.documentRoot}/';
+    this._documentRoot = (params.documentRoot.endsWith('/')) ? params.documentRoot : '${params.documentRoot}/';
     this._shared = params.shared;
+    this._useRootAssets = params.useRootAssets;
   }
 
   @override
@@ -84,7 +82,7 @@ class DefaultInAppLocalhostServer extends PlatformInAppLocalhostServer {
 
         server.listen((HttpRequest request) async {
           request.response.headers.add('Access-Control-Allow-Origin', '*');
-          
+
           Uint8List body = Uint8List(0);
 
           var path = request.requestedUri.path;
@@ -97,9 +95,12 @@ class DefaultInAppLocalhostServer extends PlatformInAppLocalhostServer {
           path = _documentRoot + path;
 
           try {
-            body = (await rootBundle.load(Uri.decodeFull(path)))
-                .buffer
-                .asUint8List();
+            if (_useRootAssets) {
+              body = (await rootBundle.load(Uri.decodeFull(path))).buffer.asUint8List();
+            } else {
+              final file = File(Uri.decodeFull(path));
+              body = await file.readAsBytes();
+            }
           } catch (e) {
             print(Uri.decodeFull(path));
             print(e.toString());
@@ -108,8 +109,7 @@ class DefaultInAppLocalhostServer extends PlatformInAppLocalhostServer {
           }
 
           var contentType = ContentType('text', 'html', charset: 'utf-8');
-          if (!request.requestedUri.path.endsWith('/') &&
-              request.requestedUri.pathSegments.isNotEmpty) {
+          if (!request.requestedUri.path.endsWith('/') && request.requestedUri.pathSegments.isNotEmpty) {
             final mimeType = MimeTypeResolver.lookup(request.requestedUri.path);
             if (mimeType != null) {
               contentType = _getContentTypeFromMimeType(mimeType);

@@ -16,6 +16,7 @@ class PlatformInAppLocalhostServerCreationParams {
     this.directoryIndex = 'index.html',
     this.documentRoot = './',
     this.shared = false,
+    this.useRootAssets = true,
   });
 
   ///{@macro flutter_inappwebview_platform_interface.PlatformInAppLocalhostServer.port}
@@ -29,6 +30,8 @@ class PlatformInAppLocalhostServerCreationParams {
 
   ///{@macro flutter_inappwebview_platform_interface.PlatformInAppLocalhostServer.shared}
   final bool shared;
+
+  final bool useRootAssets;
 }
 
 ///{@template flutter_inappwebview_platform_interface.PlatformInAppLocalhostServer}
@@ -43,8 +46,7 @@ class PlatformInAppLocalhostServerCreationParams {
 ///{@endtemplate}
 abstract class PlatformInAppLocalhostServer extends PlatformInterface {
   /// Creates a new [PlatformInAppLocalhostServer]
-  factory PlatformInAppLocalhostServer(
-      PlatformInAppLocalhostServerCreationParams params) {
+  factory PlatformInAppLocalhostServer(PlatformInAppLocalhostServerCreationParams params) {
     assert(
       InAppWebViewPlatform.instance != null,
       'A platform implementation for `flutter_inappwebview` has not been set. Please '
@@ -53,8 +55,7 @@ abstract class PlatformInAppLocalhostServer extends PlatformInterface {
       '`WebViewPlatform.instance` can be set with your own test implementation.',
     );
     final PlatformInAppLocalhostServer inAppLocalhostServer =
-        InAppWebViewPlatform.instance!
-            .createPlatformInAppLocalhostServer(params);
+        InAppWebViewPlatform.instance!.createPlatformInAppLocalhostServer(params);
     PlatformInterface.verify(inAppLocalhostServer, _token);
     return inAppLocalhostServer;
   }
@@ -65,8 +66,7 @@ abstract class PlatformInAppLocalhostServer extends PlatformInterface {
   /// Should only be used by platform implementations because they can't extend
   /// a class that only contains a factory constructor.
   @protected
-  PlatformInAppLocalhostServer.implementation(this.params)
-      : super(token: _token);
+  PlatformInAppLocalhostServer.implementation(this.params) : super(token: _token);
 
   static final Object _token = Object();
 
@@ -113,23 +113,20 @@ abstract class PlatformInAppLocalhostServer extends PlatformInterface {
   ///The `NSAllowsLocalNetworking` key is available since **iOS 10**.
   ///{@endtemplate}
   Future<void> start() {
-    throw UnimplementedError(
-        'start is not implemented on the current platform');
+    throw UnimplementedError('start is not implemented on the current platform');
   }
 
   ///{@template flutter_inappwebview_platform_interface.PlatformInAppLocalhostServer.close}
   ///Closes the server.
   ///{@endtemplate}
   Future<void> close() {
-    throw UnimplementedError(
-        'close is not implemented on the current platform');
+    throw UnimplementedError('close is not implemented on the current platform');
   }
 
   ///{@template flutter_inappwebview_platform_interface.PlatformInAppLocalhostServer.isRunning}
   ///Indicates if the server is running or not.
   ///{@endtemplate}
   bool isRunning() {
-    throw UnimplementedError(
-        'isRunning is not implemented on the current platform');
+    throw UnimplementedError('isRunning is not implemented on the current platform');
   }
 }
